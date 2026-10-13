@@ -2,7 +2,7 @@ import os
 import cv2
 import numpy as np
 
-def generate_surgical_simulation_frame(frame_idx, total_frames=200):
+def generate_surgical_simulation_frame(frame_idx, total_frames=120):
     """
     Simulates a high-contrast endoscopic camera view with an anatomical hazard zone
     and a moving surgical instrument tip tracking across the workspace.
@@ -11,7 +11,6 @@ def generate_surgical_simulation_frame(frame_idx, total_frames=200):
     frame = np.ones((600, 800, 3), dtype=np.uint8) * 40
     
     # Define a static, highly sensitive anatomical hazard region (Critical Boundary)
-    # Circle properties: center coordinates (X, Y), radius
     hazard_center = (400, 300)
     hazard_radius = 90
     cv2.circle(frame, hazard_center, hazard_radius, (0, 0, 180), -1)  # Crimson fill
@@ -26,7 +25,7 @@ def generate_surgical_simulation_frame(frame_idx, total_frames=200):
     
     # Render a vibrant colored target marker on the physical tool tip for visual extraction
     cv2.circle(frame, (tool_x, tool_y), 15, (0, 255, 0), -1)  # Pure Green Tracking Ring
-    cv2.circle(frame, (tool_x, tool_y), 5, (255, 255, 255), -1) # Core tool node
+    cv2.circle(frame, (tool_x, tool_y), 5, (255, 255, 255), -1)  # Core tool node
     
     return frame, (tool_x, tool_y), hazard_center, hazard_radius
 
@@ -41,7 +40,7 @@ class SpatialPerceptionEngine:
         hsv = cv2.cvtColor(rgb_frame, cv2.COLOR_BGR2HSV)
         
         # Isolate the high-contrast tracker ring affixed to the instrument tip
-        lower_green = np.array([35, 50, 50])
+        lower_green = np.array([35, 100, 100])
         upper_green = np.array([85, 255, 255])
         mask = cv2.inRange(hsv, lower_green, upper_green)
         
@@ -74,8 +73,6 @@ class SpatialPerceptionEngine:
 if __name__ == "__main__":
     print("[SYSTEM] Booting Edge Spatial Perception Environment...")
     total_simulation_frames = 120
-    output_directory = "output_sequence"
-    os.makedirs(output_directory, exist_ok=True)
     
     # Instantiate the detector engine configuration parameters based on frame 0 state
     sample_frame, _, hz_c, hz_r = generate_surgical_simulation_frame(0)
@@ -97,7 +94,6 @@ if __name__ == "__main__":
             distance, hazard_breached = perception_engine.evaluate_geofence(computed_coords)
             
             # 3. Draw active visual analytics onto screen interface
-            # Render track history trajectory string
             for idx in range(1, len(perception_engine.tracking_history)):
                 cv2.line(raw_view, perception_engine.tracking_history[idx-1], 
                          perception_engine.tracking_history[idx], (255, 255, 0), 2)
@@ -107,7 +103,7 @@ if __name__ == "__main__":
                 # Flash sharp visual warning flags across the live viewport interface
                 cv2.putText(raw_view, "CRITICAL WARNING: AREA BREACHED", (50, 80), 
                             cv2.FONT_HERSHEY_COMPLEX, 0.8, (0, 0, 255), 2, cv2.LINE_AA)
-                cv2.rectangle(raw_view, (0, 0), (800, 600), (0, 0, 255), 8) # Red boundary outline
+                cv2.rectangle(raw_view, (0, 0), (800, 600), (0, 0, 255), 8)  # Red boundary outline
             else:
                 cv2.putText(raw_view, "SAFETY STATUS: NOMINAL", (50, 80), 
                             cv2.FONT_HERSHEY_COMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
@@ -118,9 +114,9 @@ if __name__ == "__main__":
             cv2.putText(raw_view, f"Proximity Distance: {distance:.1f} px", 
                         (50, 550), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
             
-        # Export signature frames to visualize processing milestones inside the README
-        if f_idx in [30, 75]:  # Capture nominal and hazard states
-            save_path = os.path.join(f"localization_checkpoint_frame_{f_idx}.png")
+        # FIX: Explicitly check for frame milestones and save directly to the workspace root directory
+        if f_idx in [30, 75]:
+            save_path = f"localization_checkpoint_frame_{f_idx}.png"
             cv2.imwrite(save_path, raw_view)
             print(f"[EXPORT] Diagnostic snapshot saved at: {save_path}")
 
