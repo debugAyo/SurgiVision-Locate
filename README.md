@@ -14,5 +14,13 @@ This repository demonstrates an algorithmic approach to spatial perception, tail
 ## Verification Checkpoints
 The pipeline generates high-resolution tracking logs and snapshots that illustrate safety states. The system accurately differentiates normal adjustments from spatial safety violations:
 
-- **Nominal Tracking State (`localization_checkpoint_frame_30.png`):** Features continuous coordinate calculation and spatial tracking overlays as the instrument moves safely.
-- **Active Hazard Interlock (`localization_checkpoint_frame_75.png`):** Shows instant red warning outlines and a critical status alert overlay when safe geometric limits are crossed.
+### 1. Nominal Tracking State
+Continuous coordinate calculation and spatial tracking overlays as the instrument moves safely.
+
+![Nominal Tracking State](localization_checkpoint_frame_30.png)
+
+### 2. Active Hazard Interlock
+Instant red warning outlines and a critical status alert overlay when safe geometric limits are crossed.
+
+![Active Hazard Interlock](localization_checkpoint_frame_75.png)
+.
